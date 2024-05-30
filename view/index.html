@@ -11,6 +11,11 @@
       rel="stylesheet"
       href="/css/styles.css"
     />
+    <script
+      src="https://cdn.socket.io/4.7.5/socket.io.min.js"
+      integrity="sha384-2huaZvOR9iDzHqslqwpR87isEmrfxqyWOF7hr7BY6KG0+hVKLoEXMPUJw3ynWuhO"
+      crossorigin="anonymous"
+    ></script>
   </head>
   <body>
     <div class="max-w-6xl mx-auto p-5">
@@ -36,6 +41,7 @@
         </div>
       </section>
       <section class="flex justify-center gap-y-10 lg:gap-x-5 flex-col lg:flex-row">
+        <!-- Suhu -->
         <div
           class="w-full rounded-xl bg-white p-6 text-center shadow-[rgba(0,_0,_0,_0.24)_0px_3px_8px] dark:bg-gray-900"
         >
@@ -55,10 +61,13 @@
             </svg>
           </div>
           <h1 class="mb-3 text-4xl font-medium text-gray-800 dark:text-gray-100 lg:px-14">
-            20&deg;C
+            <span class="suhu">20</span>&deg;C
           </h1>
-          <p class="px-4 text-rose-400 font-sans">Suhu lingkungan</p>
+          <p class="px-4 text-rose-400 font-sans">Suhu ruangan</p>
         </div>
+        <!-- Suhu -->
+
+        <!-- Kelembaban -->
         <div
           class="w-full rounded-xl bg-white p-6 text-center shadow-[rgba(0,_0,_0,_0.24)_0px_3px_8px] dark:bg-gray-900"
         >
@@ -99,10 +108,13 @@
             </svg>
           </div>
           <h1 class="mb-3 text-4xl font-medium text-gray-800 dark:text-gray-100 lg:px-14">
-            20&deg;C
+            <span class="kelembaban">20</span>&#37;
           </h1>
-          <p class="px-4 text-rose-400 font-sans">Kelembaban lingkungan</p>
+          <p class="px-4 text-rose-400 font-sans">Kelembaban udara</p>
         </div>
+        <!-- Kelembaban -->
+
+        <!-- Status Kipas -->
         <div
           class="w-full rounded-xl bg-white p-6 text-center shadow-[rgba(0,_0,_0,_0.24)_0px_3px_8px] dark:bg-gray-900"
         >
@@ -160,10 +172,39 @@
               </g>
             </svg>
           </div>
-          <h1 class="mb-3 text-4xl font-semibold text-gray-800 dark:text-gray-100 lg:px-14">OFF</h1>
+          <h1 class="mb-3 text-4xl font-semibold text-gray-800 dark:text-gray-100 lg:px-14">
+            <span class="kipas">OFF</span>
+          </h1>
           <p class="px-4 text-rose-400 font-sans">Status kipas</p>
         </div>
+        <!-- Status Kipas -->
       </section>
+
+      <footer>
+        <div class="flex justify-center mt-10">
+          <p class="text-center text-gray-800 dark:text-gray-100">
+            &copy; <span class="tahun"></span> Ahmad Zidni Hidayat, Informatika B. All rights
+            reserved.
+          </p>
+        </div>
+      </footer>
     </div>
+    <script>
+      const tahun = document.querySelector(".tahun");
+      tahun.innerText = new Date().getFullYear();
+    </script>
+    <script>
+      const suhu = document.querySelector(".suhu");
+      const kelembaban = document.querySelector(".kelembaban");
+      const kipas = document.querySelector(".kipas");
+
+      const socket = io("http://localhost:3000");
+      socket.on("data", (data) => {
+        console.log(data);
+        suhu.textContent = data.suhu;
+        kelembaban.textContent = data.kelembaban;
+        kipas.textContent = data.kipas ? "ON" : "OFF";
+      });
+    </script>
   </body>
 </html>
