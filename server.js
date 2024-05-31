@@ -1,7 +1,10 @@
-import express from "express";
+import { ReadlineParser, SerialPort } from "serialport";
+
 import path from "path";
 import { fileURLToPath } from "url";
+
 import http from "http";
+import express from "express";
 import { Server } from "socket.io";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -16,22 +19,40 @@ let suhu = 0;
 let kelembaban = 0;
 let kipas = false;
 
-// Fungsi untuk memperbarui data setiap detik
-const updateData = () => {
-  suhu = Math.floor(Math.random() * 100);
-  kelembaban = Math.floor(Math.random() * 100);
-  kipas = suhu > 30;
-};
+function extractData(data) {
+  const kelembabanMatch = data.match(/kelembaban:(\d+)/);
+  const suhuMatch = data.match(/suhu:(\d+)/);
 
-// Interval untuk memperbarui data setiap detik
-setInterval(() => {
-  updateData();
-  io.volatile.emit("data", {
-    suhu,
-    kelembaban,
-    kipas,
-  });
-}, 1000);
+  if (kelembabanMatch && suhuMatch) {
+    const kelembaban = parseInt(kelembabanMatch[1], 10);
+    const suhu = parseInt(suhuMatch[1], 10);
+
+    return { kelembaban, suhu };
+  } else {
+    throw new Error("Data format is incorrect");
+  }
+}
+
+const port = new SerialPort({
+  path: "COM5",
+  baudRate: 9600,
+});
+
+const parser = port.pipe(new ReadlineParser({ delimiter: "\r\n" }));
+
+parser.on("data", (result) => {
+  // console.log(result); // kelembaban: 50suhu: 30
+  try {
+    const { kelembaban, suhu } = extractData(result);
+    io.volatile.emit("data", {
+      suhu,
+      kelembaban,
+      kipas,
+    });
+  } catch (error) {
+    console.error(error);
+  }
+});
 
 io.on("connection", (socket) => {
   console.log("a user connected", socket.id);
