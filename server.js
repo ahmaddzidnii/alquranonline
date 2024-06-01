@@ -15,21 +15,18 @@ const httpServer = http.createServer(app);
 
 const io = new Server(httpServer);
 
-let suhu = 0;
-let kelembaban = 0;
-let kipas = false;
-
-function extractData(data) {
-  const kelembabanMatch = data.match(/kelembaban:(\d+)/);
-  const suhuMatch = data.match(/suhu:(\d+)/);
-
-  if (kelembabanMatch && suhuMatch) {
-    const kelembaban = parseInt(kelembabanMatch[1], 10);
-    const suhu = parseInt(suhuMatch[1], 10);
-
-    return { kelembaban, suhu };
-  } else {
-    throw new Error("Data format is incorrect");
+// Fungsi untuk memformat data JSON
+function formatJson(data) {
+  try {
+    const parsedData = JSON.parse(data);
+    return {
+      suhu: parsedData.suhu,
+      kelembaban: parsedData.kelembaban,
+      kipas: parsedData.kipas,
+    };
+  } catch (error) {
+    console.error("Error parsing JSON:", error);
+    return null;
   }
 }
 
@@ -41,9 +38,8 @@ const port = new SerialPort({
 const parser = port.pipe(new ReadlineParser({ delimiter: "\r\n" }));
 
 parser.on("data", (result) => {
-  // console.log(result); // kelembaban: 50suhu: 30
   try {
-    const { kelembaban, suhu } = extractData(result);
+    const { kelembaban, suhu, kipas } = formatJson(result);
     io.volatile.emit("data", {
       suhu,
       kelembaban,
