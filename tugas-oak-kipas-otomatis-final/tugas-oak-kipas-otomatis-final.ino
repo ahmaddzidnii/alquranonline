@@ -1,13 +1,14 @@
 #include <LiquidCrystal_I2C.h> // include library LCD
 #include <DHT.h>               // include library DHT
 
+#define dht11 2 // mendefinisikan pin sensor DHT11 pada pin digital 2
 #define relay_kipas 3  // mendefinisikan pin relay kipas pada pin digital 3
 
 // Inisialisasi LCD dengan alamat 0x27 dan ukuran 16x2
 LiquidCrystal_I2C lcd(0x27, 16, 2);
 
 // Inisialisasi sensor DHT11 pada pin digital 2
-DHT dht(2, DHT11);
+DHT dht(dht11, DHT11);
 
 // Definisikan pin untuk relay kipas
 
